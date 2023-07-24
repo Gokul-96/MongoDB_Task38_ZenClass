@@ -270,34 +270,42 @@ db.mentors.insertMany([
 1.Find all the topics and tasks which are taught in the month of october
 ********************************************************************************************
 db.topics.aggregate([
-    {
+  {
+    $match: {
+      class_date: {
+        $gte: new Date("2023-10-01"),
+        $lte: new Date("2023-10-31")
+      }
+    }
+  },
+  {
+    $lookup: {
+      from: "tasks",
+      localField: "class",
+      foreignField: "class",
+      as: "tasks"
+    }
+  }
+]);
 
-        $lookup: {
-            from: "tasks",
-            localField: "class",
-            foreignField: "class",
-            as: "taskinfo",
-        },
-    },
-    {
-        $match: {
-            $and: [
-                {
-                    $or: [
-                        { topic_date: { $gt: new Date("30-sep-2022") } },
-                        { topic_date: { $lt: new Date("01-nov-2022") } },
-                    ],
-                },
 
-                {
-                    $or: [
-                        { "taskinfo.due_date": { $gt: new Date("30-sep-2022") } },
-                        { "taskinfo.due_date": { $lt: new Date("01-nov-2022") } },
-                    ],
-                },
-            ],
-        },
-    },
+db.tasks.aggregate([
+  {
+    $match: {
+      due_date: {
+        $gte: new Date("2023-10-01"),
+        $lte: new Date("2023-10-31")
+      }
+    }
+  },
+  {
+    $lookup: {
+      from: "topics",
+      localField: "class",
+      foreignField: "class",
+      as: "topics"
+    }
+  }
 ]);
 ********************************************************************************************
 2.Find all the company drives which appeared between 15-oct-2022 and 31-oct-2022
